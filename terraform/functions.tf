@@ -87,3 +87,31 @@ resource "google_cloudfunctions2_function" "export_jobs_raw" {
     google_bigquery_table.jobs_raw
   ]
 }
+# EXTRACT
+resource "google_cloudfunctions2_function" "extract_justjoinit" {
+  ...
+  depends_on = [
+    google_project_service.enabled["cloudfunctions.googleapis.com"],
+    google_project_service.enabled["run.googleapis.com"],
+    google_project_service.enabled["eventarc.googleapis.com"],
+    google_project_service.enabled["cloudbuild.googleapis.com"],
+    google_project_service.enabled["pubsub.googleapis.com"],
+    google_storage_bucket_object.functions_zip
+  ]
+}
+
+# LOAD
+resource "google_cloudfunctions2_function" "export_jobs_raw" {
+  ...
+  depends_on = [
+    google_project_service.enabled["cloudfunctions.googleapis.com"],
+    google_project_service.enabled["run.googleapis.com"],
+    google_project_service.enabled["eventarc.googleapis.com"],
+    google_project_service.enabled["cloudbuild.googleapis.com"],
+    google_project_service.enabled["pubsub.googleapis.com"],
+    google_project_service.enabled["bigquery.googleapis.com"],
+    google_storage_bucket_object.functions_zip,
+    google_pubsub_topic.jobs_raw,
+    google_bigquery_table.jobs_raw
+  ]
+}

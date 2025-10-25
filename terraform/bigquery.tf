@@ -1,6 +1,10 @@
 resource "google_bigquery_dataset" "laborinsight" {
   dataset_id = "laborinsight"
   location   = "EU"
+
+  depends_on = [
+    google_project_service.enabled["bigquery.googleapis.com"]
+  ]
 }
 
 resource "google_bigquery_table" "jobs_raw" {
@@ -18,6 +22,9 @@ resource "google_bigquery_table" "jobs_raw" {
     type  = "DAY"
     field = "ingested_at"
   }
-
   clustering = ["source"]
+
+  depends_on = [
+    google_project_service.enabled["bigquery.googleapis.com"]
+  ]
 }
