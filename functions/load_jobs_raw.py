@@ -17,21 +17,25 @@ def export_jobs_raw(event):
     b64 = event.data["message"]["data"]
     rec = json.loads(base64.b64decode(b64))
 
-    # przygotowanie wiersza zgodnego ze schemą
+    # UWAGA: dla kolumny JSON w streaming insert przekazujemy STRING z literalem JSON
+    json_literal = json.dumps(rec["payload"], ensure_ascii=False)
+
     row = {
         "source": rec["source"],
-        "payload": rec["payload"],          # kolumna typu JSON
-        "ingested_at": rec["ingested_at"],  # RFC3339: 2025-10-25T18:58:00Z — OK
-        "fingerprint": rec.get("fingerprint")
+        "payload": json_literal,            # << kluczowa zmiana
+        "ingested_at": rec["ingested_at"],
+        "fingerprint": rec.get("fingerprint"),
     }
 
-    # idempotencja: insertId przekazujemy jako row_ids (osobny argument)
     insert_id = rec.get("fingerprint") or None
 
     try:
-        errors = bq.insert_rows_json(table, [row], row_ids=[insert_id] if insert_id else None)
+        errors = bq.insert_rows_json(
+            table,
+            [row],
+            row_ids=[insert_id] if insert_id else None
+        )
         if errors:
-            # wypisz w logu, żeby łatwo diagnozować pojedyncze rekordy
             print(f"BQ insert errors: {errors}")
         else:
             print("BQ insert ok")
