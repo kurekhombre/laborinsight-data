@@ -2,28 +2,38 @@ name: terraform
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
 
 jobs:
   tf:
     runs-on: ubuntu-latest
-    defaults: { run: { working-directory: terraform } }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with: { terraform_version: 1.8.5 }
+    defaults:
+      run:
+        working-directory: terraform
 
-      - name: Init
-        env: { GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }} }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: terraform init -reconfigure
 
-      - name: Plan (PR)
+      - name: Terraform Plan
         if: github.event_name == 'pull_request'
-        env: { GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }} }
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: terraform plan -var="project_id=laborinsight-data"
 
-      - name: Apply (main)
+      - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        env: { GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }} }
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: terraform apply -auto-approve -var="project_id=laborinsight-data"
