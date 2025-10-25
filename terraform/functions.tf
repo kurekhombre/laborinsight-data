@@ -1,0 +1,89 @@
+# Bucket na ZIPy z kodem funkcji
+resource "google_storage_bucket" "functions_src" {
+  name     = "li-func-src-${var.project_id}"
+  location = var.region
+}
+
+# Spakowanie katalogu ../functions do ZIP
+data "archive_file" "functions_zip" {
+  type        = "zip"
+  source_dir  = "../functions"
+  output_path = "${path.module}/functions.zip"
+}
+
+# Wgranie ZIP do GCS
+resource "google_storage_bucket_object" "functions_zip" {
+  name   = "functions-${data.archive_file.functions_zip.output_md5}.zip"
+  bucket = google_storage_bucket.functions_src.name
+  source = data.archive_file.functions_zip.output_path
+}
+
+# EXTRACT: HTTP → publikuje rekordy do Pub/Sub
+resource "google_cloudfunctions2_function" "extract_justjoinit" {
+  name     = "extract-justjoinit"
+  location = var.region
+
+  build_config {
+    runtime     = "python311"
+    entry_point = "extract_justjoinit"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.functions_src.name
+        object = google_storage_bucket_object.functions_zip.name
+      }
+    }
+  }
+
+  service_config {
+    available_memory   = "512Mi"
+    max_instance_count = 2
+    environment_variables = {
+      PUBSUB_TOPIC     = google_pubsub_topic.jobs_raw.id # projects/<proj>/topics/jobs-raw
+      JJI_API_URL      = "https://api.justjoin.it/v2/user-panel/offers/by-cursor"
+      ITEMS_PER_PAGE   = "100"
+      HTTP_TIMEOUT_SEC = "60"
+    }
+  }
+
+  depends_on = [
+    google_pubsub_topic.jobs_raw
+  ]
+}
+
+# LOAD: Event (Pub/Sub) → BigQuery RAW
+resource "google_cloudfunctions2_function" "export_jobs_raw" {
+  name     = "export-jobs-raw"
+  location = var.region
+
+  build_config {
+    runtime     = "python311"
+    entry_point = "export_jobs_raw"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.functions_src.name
+        object = google_storage_bucket_object.functions_zip.name
+      }
+    }
+  }
+
+  # trigger z topicu jobs-raw
+  event_trigger {
+    trigger_region = var.region
+    event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
+    pubsub_topic   = google_pubsub_topic.jobs_raw.id
+    retry_policy   = "RETRY_POLICY_RETRY"
+  }
+
+  service_config {
+    available_memory   = "512Mi"
+    max_instance_count = 4
+    environment_variables = {
+      JOBS_RAW_TABLE = "${var.project_id}.${google_bigquery_dataset.laborinsight.dataset_id}.${google_bigquery_table.jobs_raw.table_id}"
+    }
+  }
+
+  depends_on = [
+    google_pubsub_topic.jobs_raw,
+    google_bigquery_table.jobs_raw
+  ]
+}
