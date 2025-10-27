@@ -18,7 +18,7 @@ WHEN MATCHED THEN
   UPDATE SET
     T.last_seen  = GREATEST(T.last_seen, S.ingested_ts),
     T.is_active  = TRUE,
-    T.payload    = S.payload,        -- opcjonalnie: nadpisuj najnowszą wersją
+    T.payload    = S.payload,
     T.title      = COALESCE(S.title, T.title),
     T.company    = COALESCE(S.company, T.company),
     T.city       = COALESCE(S.city, T.city),

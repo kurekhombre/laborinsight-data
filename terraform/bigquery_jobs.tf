@@ -19,7 +19,6 @@ resource "google_bigquery_table" "jobs_curated" {
   time_partitioning {
     type  = "DAY"
     field = "last_seen"
-    # optional: expiration_ms = 60 * 24 * 60 * 60 * 1000  # 60 dni
   }
 
   clustering = ["source", "fingerprint"]

@@ -1,19 +1,11 @@
-##############################################
-# functions.tf — Cloud Functions (2nd gen)
-# - bucket na ZIP z kodem
-# - upload ZIP-a
-# - EXTRACT (HTTP) -> Pub/Sub
-# - LOAD (Event)   -> BigQuery
-##############################################
 
-# === 0) Artefakty źródłowe funkcji (GCS + ZIP) ===
+
 
 resource "google_storage_bucket" "functions_src" {
   name     = "li-func-src-${var.project_id}"
   location = var.region
 }
 
-# Pakuje katalog ../functions do ZIP (w CI ma być w repo)
 data "archive_file" "functions_zip" {
   type        = "zip"
   source_dir  = "../functions"
@@ -26,7 +18,7 @@ resource "google_storage_bucket_object" "functions_zip" {
   source = data.archive_file.functions_zip.output_path
 }
 
-# === 1) EXTRACT: HTTP CF -> publikuje rekordy do Pub/Sub ===
+# 1 EXTRACT: HTTP CF -> Pub/Sub
 
 resource "google_cloudfunctions2_function" "extract_justjoinit" {
   name     = "extract-justjoinit"
@@ -43,7 +35,6 @@ resource "google_cloudfunctions2_function" "extract_justjoinit" {
     }
   }
 
-  # HTTP-trigger (domyślnie OIDC; możesz później dodać IAM invoker)
   service_config {
     available_memory   = "512Mi"
     max_instance_count = 2
@@ -68,7 +59,7 @@ resource "google_cloudfunctions2_function" "extract_justjoinit" {
   ]
 }
 
-# === 2) LOAD: Event CF (Pub/Sub) -> BigQuery RAW ===
+# 2 LOAD: Event CF (Pub/Sub) -> BigQuery RAW
 
 resource "google_cloudfunctions2_function" "export_jobs_raw" {
   name     = "export-jobs-raw"
@@ -85,7 +76,7 @@ resource "google_cloudfunctions2_function" "export_jobs_raw" {
     }
   }
 
-  # Wyzwalacz z Pub/Sub (jobs-raw)
+  # Trigger Pub/Sub (jobs-raw)
   event_trigger {
     trigger_region = var.region
     event_type     = "google.cloud.pubsub.topic.v1.messagePublished"
