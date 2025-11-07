@@ -1,7 +1,3 @@
-data "google_project" "current" {}
-locals {
-  cf_sa_email = "${data.google_project.current.number}-compute@developer.gserviceaccount.com"
-}
 
 resource "google_cloud_scheduler_job" "jjit_extract_daily" {
   name        = "jjit-extract-daily"

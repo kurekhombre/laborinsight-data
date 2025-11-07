@@ -91,7 +91,7 @@ resource "google_cloudfunctions2_function" "export_jobs_raw" {
       JOBS_RAW_TABLE = "${var.project_id}.${google_bigquery_dataset.laborinsight.dataset_id}.${google_bigquery_table.jobs_raw.table_id}"
     }
     ingress_settings = "ALLOW_INTERNAL_ONLY"
-    timeout_seconds = 300
+    timeout_seconds  = 300
 
   }
 

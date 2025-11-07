@@ -12,7 +12,6 @@ resource "google_cloud_run_v2_job" "nfj_scraper" {
           value = google_pubsub_topic.jobs_raw.id
         }
       }
-
       service_account = local.cf_sa_email
     }
   }
