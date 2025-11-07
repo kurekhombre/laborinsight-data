@@ -15,7 +15,7 @@ resource "google_bigquery_table" "jobs_raw" {
     { name = "source",      type = "STRING",    mode = "REQUIRED" },
     { name = "payload",     type = "JSON",      mode = "REQUIRED" },
     { name = "ingested_at", type = "TIMESTAMP", mode = "REQUIRED" },
-    { name = "fingerprint", type = "STRING",    mode = "NULLABLE" }
+    { name = "fingerprint", type = "STRING",    mode = "REQUIRED" }
   ])
 
   time_partitioning {
