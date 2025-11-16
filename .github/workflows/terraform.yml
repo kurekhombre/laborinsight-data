@@ -28,12 +28,14 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_colab_service_account_email: ${{ secrets.COLAB_SERVICE_ACCOUNT_EMAIL }}
         run: terraform init -reconfigure
 
       - name: Terraform Plan (PR)
         if: github.event_name == 'pull_request'
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_colab_service_account_email: ${{ secrets.COLAB_SERVICE_ACCOUNT_EMAIL }}
         run: |
           terraform plan \
             -lock-timeout=2m \
@@ -44,6 +46,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          TF_VAR_colab_service_account_email: ${{ secrets.COLAB_SERVICE_ACCOUNT_EMAIL }}
         run: |
           terraform apply -auto-approve \
             -lock-timeout=2m \
