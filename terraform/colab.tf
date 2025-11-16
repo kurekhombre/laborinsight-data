@@ -1,6 +1,6 @@
 resource "google_storage_bucket" "protocol_notebooks" {
   name                        = "li-colab-notebooks-${var.project_id}"
-  location                    = var.region
+  location                    = "europe-west1"
   force_destroy               = true
   uniform_bucket_level_access = true
 
