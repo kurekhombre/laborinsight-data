@@ -7,7 +7,9 @@ resource "google_project_service" "enabled" {
     "cloudfunctions.googleapis.com",
     "cloudbuild.googleapis.com",
     "bigquery.googleapis.com",
-    "cloudscheduler.googleapis.com",   # << DODANE
+    "cloudscheduler.googleapis.com",
+    "compute.googleapis.com", 
+    "aiplatform.googleapis.com", 
   ])
   project = var.project_id
   service = each.key

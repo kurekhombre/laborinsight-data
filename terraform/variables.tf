@@ -9,3 +9,14 @@ variable "gcp_credentials" {
   type      = string
   sensitive = true
 }
+
+variable "colab_location" {
+  type        = string
+  description = "Region for Colab Enterprise resources"
+  default     = "europe-west1"
+}
+
+variable "colab_service_account_email" {
+  type        = string
+  description = "Service account email used to run Colab notebook executions"
+}
