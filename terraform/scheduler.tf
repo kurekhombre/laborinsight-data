@@ -2,7 +2,7 @@
 
 data "google_project" "current" {}
 locals {
-  cf_sa_email = "${data.google_project.current.number}-compute@developer.gserviceaccount.com"   # <------------------- właściwym podejściem w chmurach publicznych jest zakładanie dedykowanych kont serwisowych (SA) do usług. Tutaj widzę, że korzystasz z takiego głównego/projektowego.
+  cf_sa_email = "${data.google_project.current.number}-compute@developer.gserviceaccount.com"   # <------------------- właściwym podejściem w chmurach publicznych jest zakładanie dedykowanych kont serwisowych (SA) do usług. Tutaj widzę, że korzystasz z takiego głównego/projektowego. Dedykowanemu przypisujesz minimalne role jakich potrzebuje, aby usługa działała.
 }
 
 resource "google_cloud_scheduler_job" "jjit_extract_daily" {
