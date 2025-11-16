@@ -1,4 +1,4 @@
-
+# 1. Robisz mnóstwo wielkich bloków depends_on. One są bardzo spoko, gdy operujesz na zasobach tworzonych przez różnych providerów albo zależy Ci na odpowiedniej kolejności jakichś custom uderzeń do API, ale gdy całość odbywa się w ramach jednego providera to najczęściej on sam umie zarządzać kolejnością powoływanych zasobów.
 
 
 resource "google_storage_bucket" "functions_src" {
