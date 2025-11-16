@@ -6,6 +6,11 @@ resource "google_colab_runtime_template" "protocol_runtime" {
     machine_type = "e2-standard-4"
   }
 
+  data_persistent_disk_spec {
+    disk_type    = "pd-standard" 
+    disk_size_gb = 20
+  }
+
   network_spec {
     enable_internet_access = true
   }

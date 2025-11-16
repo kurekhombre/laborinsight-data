@@ -9,8 +9,7 @@ resource "google_colab_schedule" "protocol_daily" {
       display_name = "protocol-scraper-execution"
 
       gcs_notebook_source {
-        uri        = "gs://${google_storage_bucket_object.protocol_notebook.bucket}/${google_storage_bucket_object.protocol_notebook.name}"
-        generation = google_storage_bucket_object.protocol_notebook.generation
+      uri = "gs://${google_storage_bucket_object.protocol_notebook.bucket}/${google_storage_bucket_object.protocol_notebook.name}"
       }
 
       notebook_runtime_template_resource_name = google_colab_runtime_template.protocol_runtime.id
