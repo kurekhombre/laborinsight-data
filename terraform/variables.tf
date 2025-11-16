@@ -1,3 +1,5 @@
+# 1. Dobrą praktyką jest dawanie opisu do wszystkich zmiennych i sortowanie ich alfabetycznie - https://developer.hashicorp.com/terraform/language/block/variable#description
+
 variable "project_id" {
   type = string
 }
