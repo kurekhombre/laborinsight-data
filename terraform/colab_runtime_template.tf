@@ -1,6 +1,6 @@
 resource "google_colab_runtime_template" "protocol_runtime" {
   display_name = "protocol-scraper-runtime"
-  location     = "europe-west1"
+  location     = "europe-central2"
 
   machine_spec {
     machine_type = "e2-standard-4"
