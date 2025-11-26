@@ -8,7 +8,7 @@ resource "google_colab_runtime_template" "protocol_runtime" {
 
   data_persistent_disk_spec {
     disk_type    = "pd-standard" 
-    disk_size_gb = 20
+    disk_size_gb = 20 # sprawdzic to. byc moze przy kazdej inicjacji bedzie tworzyc nowy dysk. wysiwietlal sie w przezszlosci blad error code 8 "Quota'SSD_TOTAL_GB' exceeded". Byc moze problem jest natury eu-central. doczytac czym jest ta quota
   }
 
   network_spec {

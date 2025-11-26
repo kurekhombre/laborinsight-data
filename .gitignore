@@ -115,3 +115,6 @@ terraform.tfstate.backup
 
 ###
 key.json
+env.auto.tfvars
+terraform.tfvars
+*.zip

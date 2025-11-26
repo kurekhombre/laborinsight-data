@@ -1,3 +1,5 @@
+# 1. w wielu miejsach przewija się odwołanie do 'google_bigquery_dataset.laborinsight.dataset_id' - można to zapisać ładniej przy pomocy 'locals'  (https://developer.hashicorp.com/terraform/language/block/locals). 
+
 resource "google_bigquery_table" "jobs_curated" {
   dataset_id = google_bigquery_dataset.laborinsight.dataset_id
   table_id   = "jobs"
