@@ -13,5 +13,4 @@ resource "google_storage_bucket_object" "protocol_notebook" {
   name   = "protocol_scraper.ipynb"
   bucket = google_storage_bucket.protocol_notebooks.name
   source = "${path.module}/support/notebooks/protocol_scraper.ipynb"
-  source = file("${path.module}/support/sql/merge_jobs.sql"
 }
