@@ -1,6 +1,6 @@
 resource "google_colab_schedule" "protocol_daily" {
   display_name             = "protocol-scraper-daily"
-  location                 = "europe-central2"
+  location                 = "europe-west4"
   max_concurrent_run_count = 1
   cron                     = "TZ=Europe/Warsaw 0 7 * * *"
 
