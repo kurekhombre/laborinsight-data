@@ -15,7 +15,7 @@ variable "gcp_credentials" {
 variable "colab_location" {
   type        = string
   description = "Region for Colab Enterprise resources"
-  default     = "europe-central2"
+  default     = "europe-west4"
 }
 
 variable "colab_service_account_email" {

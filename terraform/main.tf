@@ -12,3 +12,10 @@ provider "google" {
   region      = var.region
   credentials = var.gcp_credentials
 }
+
+provider "google" {
+  alias       = "west4"
+  project     = var.project_id
+  region      = "europe-west4"
+  credentials = var.gcp_credentials
+}

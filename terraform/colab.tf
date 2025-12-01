@@ -1,4 +1,5 @@
 resource "google_storage_bucket" "protocol_notebooks" {
+  provider = google.west4
   name                        = "li-colab-notebooks-${var.project_id}"
   location                    = "europe-west4"
   force_destroy               = true
@@ -13,4 +14,10 @@ resource "google_storage_bucket_object" "protocol_notebook" {
   name   = "protocol_scraper.ipynb"
   bucket = google_storage_bucket.protocol_notebooks.name
   source = "${path.module}/support/notebooks/protocol_scraper.ipynb"
+}
+
+resource "google_storage_bucket_object" "solidjobs_notebook" {
+  name   = "solidjobs_scraper.ipynb"
+  bucket = google_storage_bucket.protocol_notebooks.name 
+  source = "${path.module}/support/notebooks/solidjobs_scraper.ipynb"
 }
