@@ -87,23 +87,18 @@ resource "google_cloudfunctions2_function" "export_jobs_raw" {
   service_config {
     available_memory   = "512Mi"
     max_instance_count = 4
-    environment_variables = {
-      JOBS_RAW_TABLE = "${var.project_id}.${google_bigquery_dataset.laborinsight.dataset_id}.${google_bigquery_table.jobs_raw.table_id}"
+environment_variables = {
+      // Definiujemy mapę tabel, bazując na źródle (source)
+      TABLE_MAP = jsonencode({
+        "justjoinit"     = "${var.project_id}.${google_bigquery_dataset.laborinsight.dataset_id}.${google_bigquery_table.bronze_justjoinit_jobs.table_id}",
+        "solidjobs"      = "${var.project_id}.${google_bigquery_dataset.laborinsight.dataset_id}.${google_bigquery_table.bronze_solidjobs_jobs.table_id}",
+        "theprotocol"  = "${var.project_id}.${google_bigquery_dataset.laborinsight.dataset_id}.${google_bigquery_table.bronze_theprotocolit_jobs.table_id}"
+      })
     }
     ingress_settings = "ALLOW_INTERNAL_ONLY"
     timeout_seconds = 300
 
   }
 
-  depends_on = [
-    google_project_service.enabled["cloudfunctions.googleapis.com"],
-    google_project_service.enabled["run.googleapis.com"],
-    google_project_service.enabled["eventarc.googleapis.com"],
-    google_project_service.enabled["cloudbuild.googleapis.com"],
-    google_project_service.enabled["pubsub.googleapis.com"],
-    google_project_service.enabled["bigquery.googleapis.com"],
-    google_storage_bucket_object.functions_zip,
-    google_pubsub_topic.jobs_raw,
-    google_bigquery_table.jobs_raw
-  ]
+
 }
