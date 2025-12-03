@@ -4,7 +4,7 @@
 # (Ogólna uwaga) 4. Kolejna z dobrych praktyk do tagowanie/labelowanie zasobów, per projekt lub środowisko. Tutaj - podobnie jak wcześniej - nie ma to takiego znaczenia, ale w firmie jakbyś coś pisał to szczególnie pod kątem monitorowania kosztów must have. Bez tego nie da się efektynie pracować nad FinOpsem
 terraform {
   required_providers {
-    google = { source = "hashicorp/google", version = "~> 6.0" }
+    google = { source = "hashicorp/google", version = "~> 7.0" }
   }
 }
 provider "google" {
