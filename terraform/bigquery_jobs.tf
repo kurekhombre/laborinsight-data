@@ -27,7 +27,7 @@
 # }
 # SILVER
 
-# JAJA TUTAJ BYŁy. AI ZROBIŁO SWOJE
+#JAJA TUTAJ BYŁy. AI ZROBIŁO SWOJE
 
 locals {
   # Pełna, jawna definicja schematu tabeli Silver. 
@@ -119,6 +119,100 @@ resource "google_bigquery_table" "silver_justjoinit_jobs" {
     ]
     
     # Ignorowanie atrybutów tylko do odczytu, które powodowały niespójności planu
+    ignore_changes = [
+      creation_time,
+      last_modified_time,
+      num_bytes,
+      num_long_term_bytes,
+      num_rows,
+      self_link,
+      type,
+      etag,
+      location,
+      max_staleness,
+      generated_schema_columns
+    ]
+  }
+}
+
+locals {
+  # Jawna definicja schematu tabeli Silver dla Solid.jobs
+  solidjobs_silver_schema = [
+    { name = "job_key",      type = "STRING",    mode = "REQUIRED" },
+    { name = "ingested_at",  type = "TIMESTAMP", mode = "REQUIRED" },
+    { name = "source_name",  type = "STRING",    mode = "REQUIRED" },
+
+    { name = "category",     type = "STRING",    mode = "NULLABLE" },
+    { name = "title",        type = "STRING",    mode = "NULLABLE" },
+    { name = "company",      type = "STRING",    mode = "NULLABLE" },
+    { name = "city",         type = "STRING",    mode = "NULLABLE" },
+    { name = "seniority",    type = "STRING",    mode = "NULLABLE" },
+    { name = "workplace",    type = "STRING",    mode = "NULLABLE" },
+
+    # Tablica struktur (contracts) – zostawiamy kompatybilną strukturę jak dla innych źródeł
+    {
+      name  = "contracts",
+      type  = "STRUCT",
+      mode  = "REPEATED",
+      fields = [
+        { name = "type",       type = "STRING",  mode = "NULLABLE" },
+        { name = "unit",       type = "STRING",  mode = "NULLABLE" },
+        { name = "salary_min", type = "NUMERIC", mode = "NULLABLE" },
+        { name = "salary_max", type = "NUMERIC", mode = "NULLABLE" },
+        { name = "is_gross",   type = "BOOLEAN", mode = "NULLABLE" }
+      ]
+    },
+
+    # Tablica stringów (tech_stack)
+    {
+      name = "tech_stack",
+      type = "STRING",
+      mode = "REPEATED"
+    },
+
+    { name = "original_url", type = "STRING",    mode = "NULLABLE" },
+  ]
+}
+
+# -----------------------------------------------------------------------------
+# Wyzwalacz zmian schematu (Null Resource)
+# -----------------------------------------------------------------------------
+resource "null_resource" "trigger_solidjobs_silver_schema_update" {
+  triggers = {
+    schema_hash = md5(jsonencode(local.solidjobs_silver_schema))
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Tabela BigQuery (Silver Solid.jobs Jobs)
+# -----------------------------------------------------------------------------
+resource "google_bigquery_table" "silver_solidjobs_jobs" {
+  dataset_id          = google_bigquery_dataset.laborinsight.dataset_id
+  table_id            = "silver_solidjobs_jobs"
+  deletion_protection = false
+
+  description   = "Tabela Silver dla Solid.jobs po transformacji i standaryzacji."
+  friendly_name = "Silver Solid.jobs Jobs"
+  labels = {
+    layer  = "silver"
+    source = "solidjobs"
+  }
+
+  require_partition_filter = false
+  schema = jsonencode(local.solidjobs_silver_schema)
+
+  time_partitioning {
+    type  = "DAY"
+    field = "ingested_at"
+  }
+
+  clustering = ["job_key", "city", "category"]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.trigger_solidjobs_silver_schema_update
+    ]
+
     ignore_changes = [
       creation_time,
       last_modified_time,
