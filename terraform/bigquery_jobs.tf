@@ -28,7 +28,9 @@
 # SILVER
 
 #JAJA TUTAJ BYŁy. AI ZROBIŁO SWOJE
-
+locals {
+  bq_dataset_id = google_bigquery_dataset.laborinsight.dataset_id
+}
 locals {
   # Pełna, jawna definicja schematu tabeli Silver. 
   # Używamy jej, aby móc się do niej odwołać w bloku 'lifecycle' (replace_triggered_by).
