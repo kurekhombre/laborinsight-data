@@ -29,8 +29,21 @@ USING (
       ) AS company,
 
       COALESCE(TRIM(JSON_VALUE(t1.payload, '$.location')), 'Unknown') AS city,
-      COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'Other')  AS seniority,
-
+        (
+        WITH s AS (
+            SELECT LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other')) AS v
+        )
+        SELECT CASE
+            WHEN v IN ('intern', 'internship', 'trainee', 'praktykant', 'stażysta') THEN 'junior'
+            WHEN v IN ('junior', 'jr') THEN 'junior'
+            WHEN v IN ('regular', 'mid', 'middle', 'mid-level') THEN 'mid'
+            WHEN v IN ('senior', 'sr') THEN 'senior'
+            WHEN v IN ('lead', 'tech lead', 'principal', 'staff') THEN 'lead'
+            WHEN v IN ('c_level', 'c-level', 'cto', 'ceo', 'vp', 'head') THEN 'c_level'
+            ELSE 'other'
+        END
+        FROM s
+        ) AS seniority,
       -- Solid często nie ma jawnego workplaceType -> ustawiamy Unknown
       'unknown' AS workplace,
 
