@@ -1,5 +1,5 @@
 MERGE INTO 
-  `laborinsight-data.laborinsight.silver_solid_jobs` AS T
+  `laborinsight-data.laborinsight.silver_solidjobs_jobs` AS T
 USING (
   WITH LatestRawData AS (
     SELECT
