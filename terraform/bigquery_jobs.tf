@@ -232,3 +232,92 @@ resource "google_bigquery_table" "silver_solidjobs_jobs" {
     ]
   }
 }
+
+
+locals {
+  theprotocolit_silver_schema = [
+    { name = "job_key",     type = "STRING",    mode = "REQUIRED" },
+    { name = "ingested_at", type = "TIMESTAMP", mode = "REQUIRED" },
+    { name = "source_name", type = "STRING",    mode = "REQUIRED" },
+
+    { name = "category",  type = "STRING", mode = "NULLABLE" },
+    { name = "title",     type = "STRING", mode = "NULLABLE" },
+    { name = "company",   type = "STRING", mode = "NULLABLE" },
+    { name = "city",      type = "STRING", mode = "NULLABLE" },
+    { name = "seniority", type = "STRING", mode = "NULLABLE" },
+    { name = "workplace", type = "STRING", mode = "NULLABLE" },
+
+    {
+      name  = "contracts",
+      type  = "STRUCT",
+      mode  = "REPEATED",
+      fields = [
+        { name = "type",       type = "STRING",  mode = "NULLABLE" },
+        { name = "unit",       type = "STRING",  mode = "NULLABLE" },
+        { name = "salary_min", type = "NUMERIC", mode = "NULLABLE" },
+        { name = "salary_max", type = "NUMERIC", mode = "NULLABLE" },
+        { name = "is_gross",   type = "BOOLEAN", mode = "NULLABLE" }
+      ]
+    },
+
+    {
+      name = "tech_stack",
+      type = "STRING",
+      mode = "REPEATED"
+    },
+
+    { name = "original_url",      type = "STRING", mode = "NULLABLE" },
+    { name = "must_have",         type = "STRING", mode = "NULLABLE" },
+    { name = "responsibilities",  type = "STRING", mode = "NULLABLE" },
+    { name = "offer_description", type = "STRING", mode = "NULLABLE" },
+  ]
+}
+
+resource "null_resource" "trigger_theprotocolit_silver_schema_update" {
+  triggers = {
+    schema_hash = md5(jsonencode(local.theprotocolit_silver_schema))
+  }
+}
+
+resource "google_bigquery_table" "silver_theprotocolit_jobs" {
+  dataset_id          = local.bq_dataset_id
+  table_id            = "silver_theprotocolit_jobs"
+  deletion_protection = false
+
+  description   = "Tabela Silver dla TheProtocol.it po transformacji i standaryzacji."
+  friendly_name = "Silver TheProtocol.it Jobs"
+  labels = {
+    layer  = "silver"
+    source = "theprotocolit"
+  }
+
+  require_partition_filter = false
+  schema = jsonencode(local.theprotocolit_silver_schema)
+
+  time_partitioning {
+    type  = "DAY"
+    field = "ingested_at"
+  }
+
+  clustering = ["job_key", "city", "category"]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.trigger_theprotocolit_silver_schema_update
+    ]
+
+    ignore_changes = [
+      creation_time,
+      last_modified_time,
+      num_bytes,
+      num_long_term_bytes,
+      num_rows,
+      self_link,
+      type,
+      etag,
+      location,
+      max_staleness,
+      generated_schema_columns
+    ]
+  }
+}
