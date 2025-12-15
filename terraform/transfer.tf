@@ -35,3 +35,21 @@ resource "google_bigquery_data_transfer_config" "merge_justjoinit_silver" {
     google_bigquery_table.justjoinit_categories,
   ]
 }
+
+resource "google_bigquery_data_transfer_config" "merge_solidjobs_silver" {
+  display_name           = "Merge_SolidJobs_to_Silver"
+  location               = "EU"
+  data_source_id         = "scheduled_query"
+  
+  schedule               = "every day 08:30" 
+  
+  destination_dataset_id = google_bigquery_dataset.laborinsight.dataset_id
+
+  params = {
+    query = file("${path.module}/support/sql/merge_solidjobs_silver.sql") 
+  }
+
+  depends_on = [
+    google_bigquery_table.silver_solidjobs_jobs
+  ]
+}
