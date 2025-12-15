@@ -6,7 +6,7 @@ USING (
       payload,
       fingerprint AS job_key,
       ingested_at
-    FROM `laborinsight-data.laborinsight.bronze_solid_jobs`
+    FROM `laborinsight-data.laborinsight.bronze_solidjobs_jobs`
     WHERE DATE(ingested_at) >= DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
       AND source = 'solidjobs'
     QUALIFY ROW_NUMBER() OVER (PARTITION BY fingerprint ORDER BY ingested_at DESC) = 1
