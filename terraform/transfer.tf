@@ -50,6 +50,6 @@ resource "google_bigquery_data_transfer_config" "merge_solidjobs_silver" {
   }
 
   depends_on = [
-    google_bigquery_table.silver_solidjobs_jobs
+    google_bigquery_table.silver_solidjobs_jobs,
   ]
 }
