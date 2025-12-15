@@ -149,6 +149,7 @@ locals {
     { name = "seniority",    type = "STRING",    mode = "NULLABLE" },
     { name = "workplace",    type = "STRING",    mode = "NULLABLE" },
 
+
     # Tablica struktur (contracts) – zostawiamy kompatybilną strukturę jak dla innych źródeł
     {
       name  = "contracts",
@@ -171,6 +172,9 @@ locals {
     },
 
     { name = "original_url", type = "STRING",    mode = "NULLABLE" },
+    { name = "must_have",        type = "STRING", mode = "NULLABLE" },
+    { name = "responsibilities", type = "STRING", mode = "NULLABLE" },
+    { name = "offer_description",type = "STRING", mode = "NULLABLE" },
   ]
 }
 
