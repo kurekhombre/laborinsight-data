@@ -11,41 +11,40 @@ USING (
     QUALIFY ROW_NUMBER() OVER (PARTITION BY fingerprint ORDER BY ingested_at DESC) = 1
   ),
 
-  Parsed AS (
-    SELECT
-      t1.job_key,
-      t1.ingested_at,
-      'Solid.jobs' AS source_name,
+Parsed AS (
+  SELECT
+    t1.job_key,
+    t1.ingested_at,
+    'Solid.jobs' AS source_name,
 
-      TRIM(JSON_VALUE(t1.payload, '$.category')) AS category,
-      TRIM(JSON_VALUE(t1.payload, '$.title'))    AS title,
+    TRIM(JSON_VALUE(t1.payload, '$.category')) AS category,
+    TRIM(JSON_VALUE(t1.payload, '$.title'))    AS title,
 
-      TRIM(
-        REGEXP_REPLACE(
-          JSON_VALUE(t1.payload, '$.company'),
-          r'(?i)\s+(sp\.|spółka)\s+.*$',
-          ''
-        )
-      ) AS company,
+    TRIM(
+      REGEXP_REPLACE(
+        JSON_VALUE(t1.payload, '$.company'),
+        r'(?i)\s+(sp\.|spółka)\s+.*$',
+        ''
+      )
+    ) AS company,
 
-      COALESCE(TRIM(JSON_VALUE(t1.payload, '$.location')), 'Unknown') AS city,
-        (
-        WITH s AS (
-            SELECT LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other')) AS v
-        )
-        SELECT CASE
-            WHEN v IN ('intern', 'internship', 'trainee', 'praktykant', 'stażysta') THEN 'junior'
-            WHEN v IN ('junior', 'jr') THEN 'junior'
-            WHEN v IN ('regular', 'mid', 'middle', 'mid-level') THEN 'mid'
-            WHEN v IN ('senior', 'sr') THEN 'senior'
-            WHEN v IN ('lead', 'tech lead', 'principal', 'staff') THEN 'lead'
-            WHEN v IN ('c_level', 'c-level', 'cto', 'ceo', 'vp', 'head') THEN 'c_level'
-            ELSE 'other'
-        END
-        FROM s
-        ) AS seniority,
-      -- Solid często nie ma jawnego workplaceType -> ustawiamy Unknown
-      'unknown' AS workplace,
+    COALESCE(TRIM(JSON_VALUE(t1.payload, '$.location')), 'Unknown') AS city,
+
+    CASE
+      WHEN LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other'))
+        IN ('intern', 'internship', 'trainee', 'praktykant', 'stażysta', 'junior', 'jr') THEN 'junior'
+      WHEN LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other'))
+        IN ('regular', 'mid', 'middle', 'mid-level') THEN 'mid'
+      WHEN LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other'))
+        IN ('senior', 'sr') THEN 'senior'
+      WHEN LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other'))
+        IN ('lead', 'tech lead', 'principal', 'staff') THEN 'lead'
+      WHEN LOWER(COALESCE(TRIM(JSON_VALUE(t1.payload, '$.seniority')), 'other'))
+        IN ('c_level', 'c-level', 'cto', 'ceo', 'vp', 'head') THEN 'c_level'
+      ELSE 'other'
+    END AS seniority,
+
+    'unknown' AS workplace,
 
       -- contracts: wymuszenie dokładnego typu jak w tabeli silver
       CAST(
@@ -99,8 +98,8 @@ USING (
       TRIM(JSON_VALUE(t1.payload, '$.must_have'))         AS must_have,
       TRIM(JSON_VALUE(t1.payload, '$.responsibilities'))  AS responsibilities,
       TRIM(JSON_VALUE(t1.payload, '$.offer_description')) AS offer_description
-    FROM LatestRawData t1
-    WHERE TRIM(JSON_VALUE(t1.payload, '$.title')) IS NOT NULL
+  FROM LatestRawData t1
+  WHERE TRIM(JSON_VALUE(t1.payload, '$.title')) IS NOT NULL
   )
 
   SELECT *
